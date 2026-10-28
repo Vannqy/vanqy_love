@@ -19,7 +19,7 @@ with st.form("input_form"):
         name = st.text_input("Nhập thử Tdy đi phu nhân", max_chars=5)
     with col2:
         size = st.slider("Kích thước - Nên để 10 được gòi", min_value=5, max_value=30, value=15)
-    submitted = st.form_submit_button("✨ Vẽ trái tim")
+    submitted = st.form_submit_button("Bắt đầu")
 
 
 def play_music_loop(path: str):
