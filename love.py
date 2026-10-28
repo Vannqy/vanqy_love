@@ -43,11 +43,16 @@ if submitted:
         fx = fx * (size / 15)
         fy = fy * (size / 15)
 
+        # Viền = đỏ, phần lấp đầy = trắng
+        border_color = np.array(["red"] * len(x))
+        fill_color = np.array(["white"] * len(fx))
+
         # Trộn viền + điểm lấp đầy, sắp theo thứ tự "gõ phím" ngẫu nhiên nhưng cố định
         all_x = np.concatenate([x, fx])
         all_y = np.concatenate([y, fy])
+        all_color = np.concatenate([border_color, fill_color])
         order = rng.permutation(len(all_x))
-        all_x, all_y = all_x[order], all_y[order]
+        all_x, all_y, all_color = all_x[order], all_y[order], all_color[order]
 
         # Gán mỗi điểm một ký tự trong tên, lặp vòng
         chars = [name[i % len(name)] for i in range(len(all_x))]
@@ -55,7 +60,7 @@ if submitted:
         placeholder = st.empty()
         max_dim = max(np.abs(all_x).max(), np.abs(all_y).max()) * 1.2
 
-        step = max(1, len(all_x) // 120)  # giới hạn ~120 khung hình để mượt
+        step = max(1, len(all_x) // 60)  # ít khung hình hơn -> nhanh hơn
         for i in range(step, len(all_x) + step, step):
             fig, ax = plt.subplots(figsize=(6, 6))
             fig.patch.set_facecolor("black")
@@ -66,17 +71,18 @@ if submitted:
 
             cx, cy = all_x[:i], all_y[:i]
             cchars = chars[:i]
-            for px, py, ch in zip(cx, cy, cchars):
+            ccolors = all_color[:i]
+            for px, py, ch, col in zip(cx, cy, cchars, ccolors):
                 ax.text(
                     px, py, ch,
-                    color="white", fontsize=max(8, size / 2),
+                    color=col, fontsize=max(8, size / 2),
                     fontweight="bold", ha="center", va="center",
                     alpha=0.95,
                 )
 
             placeholder.pyplot(fig)
             plt.close(fig)
-            time.sleep(0.02)
+            time.sleep(0.005)
 
         st.success(f"Hoàn thành trái tim từ tên: {name} 💖")
         st.balloons()
