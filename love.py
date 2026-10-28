@@ -1,22 +1,48 @@
+import os
 import time
-import numpy as np
-import matplotlib.pyplot as plt
+import itertools
 import streamlit as st
+
+DEFAULT_MUSIC_PATH = "music.mp3"
 
 st.set_page_config(page_title="💖 Heart Name", page_icon="💖", layout="centered")
 
 st.markdown(
-    "<h1 style='text-align:center;color:#ff4d6d;'>💖 vanqy chào dợ iu - nhập tdy đi 💖</h1>",
+    "<h1 style='text-align:center;color:#ff4d6d;'>💖 Vanqy chào phu nhân ! 💖</h1>",
     unsafe_allow_html=True,
 )
+
+music_file = st.file_uploader(
+    "🎵 (Tuỳ chọn) Tải nhạc khác để ghi đè nhạc mặc định",
+    type=["mp3", "wav", "ogg"],
+)
+if music_file is None and os.path.exists(DEFAULT_MUSIC_PATH):
+    st.caption("🎶 Sẽ phát nhạc nền mặc định khi vẽ trái tim.")
 
 with st.form("input_form"):
     col1, col2 = st.columns(2)
     with col1:
-        name = st.text_input("Nhập tên (tối đa 5 ký tự)", max_chars=5)
+        name = st.text_input("Nhập chữ Tdy đi dợ", max_chars=5)
     with col2:
-        size = st.slider("Kích thước", min_value=5, max_value=30, value=15)
-    submitted = st.form_submit_button("Vẽ!")
+        size = st.slider("Kích thước (số dòng)", min_value=10, max_value=40, value=20)
+    submitted = st.form_submit_button("✨ Vẽ trái tim")
+
+
+def build_heart_rows(text: str, height: int):
+    """Trả về list các chuỗi tạo hình trái tim, lấp bằng ký tự của `text` lặp vòng."""
+    width = height * 2
+    cyc = itertools.cycle(text)
+    rows = []
+    for yi in range(height, -height, -1):
+        y = yi / height * 1.5
+        row_chars = []
+        for xi in range(-width, width):
+            x = xi / width * 1.9
+            f = (x ** 2 + y ** 2 - 1) ** 3 - (x ** 2) * (y ** 3)
+            row_chars.append(next(cyc) if f <= 0 else " ")
+        rows.append("".join(row_chars))
+    return rows
+
 
 if submitted:
     if not name.strip():
@@ -25,64 +51,34 @@ if submitted:
         st.error("Tên không được dài quá 5 ký tự!")
     else:
         name = name.strip()
+        rows = build_heart_rows(name, size)
 
-        # --- Tạo đường cong trái tim (parametric heart curve) ---
-        t = np.linspace(0, 2 * np.pi, 300)
-        x = 16 * np.sin(t) ** 3
-        y = 13 * np.cos(t) - 5 * np.cos(2 * t) - 2 * np.cos(3 * t) - np.cos(4 * t)
+        if music_file is not None:
+            st.audio(music_file, autoplay=True)
+        elif os.path.exists(DEFAULT_MUSIC_PATH):
+            st.audio(DEFAULT_MUSIC_PATH, autoplay=True)
 
-        x = x * (size / 15)
-        y = y * (size / 15)
-
-        # Lấp đầy bên trong trái tim bằng các điểm ngẫu nhiên có trọng số
-        rng = np.random.default_rng(42)
-        fill_t = rng.uniform(0, 2 * np.pi, 400)
-        fill_r = rng.uniform(0, 1, 400) ** 0.5  # dồn điểm ra rìa ít hơn, đều hơn ở giữa
-        fx = fill_r * 16 * np.sin(fill_t) ** 3
-        fy = fill_r * (13 * np.cos(fill_t) - 5 * np.cos(2 * fill_t) - 2 * np.cos(3 * fill_t) - np.cos(4 * fill_t))
-        fx = fx * (size / 15)
-        fy = fy * (size / 15)
-
-        # Viền = đỏ, phần lấp đầy = trắng
-        border_color = np.array(["red"] * len(x))
-        fill_color = np.array(["white"] * len(fx))
-
-        # Trộn viền + điểm lấp đầy, sắp theo thứ tự "gõ phím" ngẫu nhiên nhưng cố định
-        all_x = np.concatenate([x, fx])
-        all_y = np.concatenate([y, fy])
-        all_color = np.concatenate([border_color, fill_color])
-        order = rng.permutation(len(all_x))
-        all_x, all_y, all_color = all_x[order], all_y[order], all_color[order]
-
-        # Gán mỗi điểm một ký tự trong tên, lặp vòng
-        chars = [name[i % len(name)] for i in range(len(all_x))]
+        # font-size co giãn theo kích thước để hình không bị tràn khung
+        font_size = max(6, min(16, int(220 / size)))
 
         placeholder = st.empty()
-        max_dim = max(np.abs(all_x).max(), np.abs(all_y).max()) * 1.2
-
-        step = max(1, len(all_x) // 60)  # ít khung hình hơn -> nhanh hơn
-        for i in range(step, len(all_x) + step, step):
-            fig, ax = plt.subplots(figsize=(6, 6))
-            fig.patch.set_facecolor("black")
-            ax.set_facecolor("black")
-            ax.set_xlim(-max_dim, max_dim)
-            ax.set_ylim(-max_dim, max_dim)
-            ax.axis("off")
-
-            cx, cy = all_x[:i], all_y[:i]
-            cchars = chars[:i]
-            ccolors = all_color[:i]
-            for px, py, ch, col in zip(cx, cy, cchars, ccolors):
-                ax.text(
-                    px, py, ch,
-                    color=col, fontsize=max(8, size / 2),
-                    fontweight="bold", ha="center", va="center",
-                    alpha=0.95,
-                )
-
-            placeholder.pyplot(fig)
-            plt.close(fig)
-            time.sleep(0.005)
+        for i in range(1, len(rows) + 1):
+            text_block = "\n".join(rows[:i])
+            html = f"""
+            <pre style="
+                background:#000;
+                color:#ff4d6d;
+                font-family:'Courier New', monospace;
+                font-size:{font_size}px;
+                line-height:{font_size}px;
+                text-align:center;
+                white-space:pre;
+                padding:20px;
+                border-radius:12px;
+            ">{text_block}</pre>
+            """
+            placeholder.markdown(html, unsafe_allow_html=True)
+            time.sleep(0.03)
 
         st.success(f"Hoàn thành: {name} 💖")
         st.balloons()
