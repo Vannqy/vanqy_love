@@ -1,7 +1,10 @@
 import time
+import base64
 import numpy as np
 import matplotlib.pyplot as plt
 import streamlit as st
+
+MUSIC_PATH = "choanhchutthoi.mp3"
 
 st.set_page_config(page_title="💖 Heart Name", page_icon="💖", layout="centered")
 
@@ -16,7 +19,22 @@ with st.form("input_form"):
         name = st.text_input("Nhập thử Tdy đi phu nhân", max_chars=5)
     with col2:
         size = st.slider("Kích thước - Nên để 10 được gòi", min_value=5, max_value=30, value=15)
-    submitted = st.form_submit_button("Bắt đầu!")
+    submitted = st.form_submit_button("✨ Vẽ trái tim")
+
+
+def play_music_loop(path: str):
+    with open(path, "rb") as f:
+        data = f.read()
+    b64 = base64.b64encode(data).decode()
+    st.markdown(
+        f"""
+        <audio autoplay loop style="display:none;">
+            <source src="data:audio/mp3;base64,{b64}" type="audio/mp3">
+        </audio>
+        """,
+        unsafe_allow_html=True,
+    )
+
 
 if submitted:
     if not name.strip():
@@ -25,6 +43,8 @@ if submitted:
         st.error("Tên không được dài quá 5 ký tự!")
     else:
         name = name.strip()
+
+        play_music_loop(MUSIC_PATH)
 
         # --- Tạo đường cong trái tim (parametric heart curve) ---
         t = np.linspace(0, 2 * np.pi, 300)
