@@ -6,7 +6,7 @@ import streamlit as st
 st.set_page_config(page_title="💖 Heart Name", page_icon="💖", layout="centered")
 
 st.markdown(
-    "<h1 style='text-align:center;color:#ff4d6d;'>💖 Vẽ Trái Tim Từ Tên Bạn 💖</h1>",
+    "<h1 style='text-align:center;color:#ff4d6d;'>💖 vanqy chào dợ iu - nhập tdy đi 💖</h1>",
     unsafe_allow_html=True,
 )
 
@@ -16,7 +16,7 @@ with st.form("input_form"):
         name = st.text_input("Nhập tên (tối đa 5 ký tự)", max_chars=5)
     with col2:
         size = st.slider("Kích thước", min_value=5, max_value=30, value=15)
-    submitted = st.form_submit_button("✨ Vẽ trái tim")
+    submitted = st.form_submit_button("Vẽ!")
 
 if submitted:
     if not name.strip():
@@ -84,5 +84,5 @@ if submitted:
             plt.close(fig)
             time.sleep(0.005)
 
-        st.success(f"Hoàn thành trái tim từ tên: {name} 💖")
+        st.success(f"Hoàn thành: {name} 💖")
         st.balloons()
