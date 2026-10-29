@@ -9,14 +9,14 @@ MUSIC_PATH = "choanhchutthoi.mp3"
 st.set_page_config(page_title="💖 Heart Name", page_icon="💖", layout="centered")
 
 st.markdown(
-    "<h1 style='text-align:center;color:#ff4d6d;'>Vanqy chào phu nhân ; - ;</h1>",
+    "<h1 style='text-align:center;color:#ff4d6d;'>8/3 Secrect!</h1>",
     unsafe_allow_html=True,
 )
 
 with st.form("input_form"):
     col1, col2 = st.columns(2)
     with col1:
-        name = st.text_input("Nhập thử Tdy đi phu nhân", max_chars=5)
+        name = st.text_input("", max_chars=5)
     with col2:
         size = st.slider("Kích thước - Nên để 10 được gòi", min_value=5, max_value=30, value=15)
     submitted = st.form_submit_button("Bắt đầu")
@@ -38,7 +38,7 @@ def play_music_loop(path: str):
 
 if submitted:
     if not name.strip():
-        st.error("Bạn chưa nhập tên!")
+        st.error("Nhập tên đi quý cô!")
     elif len(name) > 5:
         st.error("Tên không được dài quá 5 ký tự!")
     else:
@@ -98,5 +98,5 @@ if submitted:
             plt.close(fig)
             time.sleep(0.02)
 
-        st.success(f"Xong cái tình yêu tui dành cho: {name} 💖")
+        st.success(f"Món quà 8/3 dành cho {name} 💖")
         st.balloons()
